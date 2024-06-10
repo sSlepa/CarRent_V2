@@ -1,10 +1,12 @@
 #include <iostream>
+#include <stdio.h>
 #include <fstream>
 #include <string>
 #include <algorithm>
 #include <vector>
 #include <map>
 #include <windows.h>
+#include <conio.h>
 #include "../headers/masina.hpp"
 
 using namespace std;
@@ -23,7 +25,7 @@ void coloredtext(WORD Culoare,const char* text){
     saved_attributes = consoleInfo.wAttributes;
 
     SetConsoleTextAttribute(hConsole, Culoare);
-    
+
     cout << text;
 
     SetConsoleTextAttribute(hConsole, saved_attributes);
@@ -48,7 +50,7 @@ void load_from_file_car_stock(){
 
             //printf("%s",linie);
             strcpy(mat[++nrMasini],linie);
-        
+
         }
         for(int i = 1 ; i <= nrMasini ; ++i){
             char *p = strtok(mat[i]," ");
@@ -66,7 +68,7 @@ void load_from_file_car_stock(){
             Masini[i] = Masina(nume,model,an,dispon,pret);
 
         }
-        
+
         fp.close();
     }
 }
@@ -84,97 +86,115 @@ void help(){
 
 }
 
+bool admin_safe(){
+
+    char pass[26];
+
+    system("cls");
+    int trys = 3;
+    int intrat = 0;
+    while(trys > 0 && intrat == 0){
+
+        cout << "Introdu parola de administrator (exit pentru a iesi): ";
+
+        int i = 0;
+        while(1){
+
+            pass[i] = getch();
+
+            if(pass[i] == 13)
+                break;
+
+            else if(i >= 1 && pass[i] == '\b'){
+                printf("\b \b");
+                i -= 2;
+            }
+            else
+                coloredtext(FOREGROUND_RED,"*");
+
+            i++;
+        }
+
+        pass[i] = '\0';
+
+        cout << '\n';
+        if(strcmp(pass,"admin123") == 0)
+            return 1;
+
+        trys--;
+    }
+
+    return 0;
+}
+
 void add_veh(int argc,char *argv[]){
 
     if(argc == 7){
+        if(admin_safe()){
+            Masini[++nrMasini] = Masina(argv[2],argv[3],argv[4],argv[5],argv[6]);
 
-        Masini[++nrMasini] = Masina(argv[2],argv[3],argv[4],argv[5],argv[6]);
-    
-        ofstream ofs("txt_files/masini.txt", ofstream::out | ofstream::trunc);
-        ofs.close();
-        ofstream afis("txt_files/masini.txt");
-        for(int i = 1 ; i <= nrMasini ; ++i)
-            afis << Masini[i] << '\n';
+            ofstream ofs("txt_files/masini.txt", ofstream::out | ofstream::trunc);
+            ofs.close();
+            ofstream afis("txt_files/masini.txt");
+            for(int i = 1 ; i <= nrMasini ; ++i)
+                afis << Masini[i] << '\n';
 
-        coloredtext(FOREGROUND_GREEN,"Masina adauga cu succes !");
-        Sleep(2500);
+            coloredtext(FOREGROUND_GREEN,"Masina adauga cu succes !");
+            Sleep(2500);
 
-        afis.close();
+            afis.close();
+        }
+        else{
+            coloredtext(FOREGROUND_RED,"Parola de ADMIN gresita");
+        }
     }
     else{
-        coloredtext(FOREGROUND_RED,"SINTAXA INVALIDA ! Foloseste comanda Help");
+        coloredtext(FOREGROUND_RED,"SINTAXA INVALIDA ! Foloseste comanda Help\n");
+        coloredtext(FOREGROUND_RED,"ADD [nume] [model] [an] [disponibilitate] [pret]\n");
     }
 
 }
 void viz_veh(){
 
     system("cls");
-    for(int i = 1 ; i <= nrMasini ; ++i)
-        cout << i << ". " << Masini[i] << '\n';
+    if(nrMasini != 0){
 
-    cout << '\n';
+        for(int i = 1 ; i <= nrMasini ; ++i)
+            cout << i << ". " << Masini[i] << '\n';
+
+        cout << '\n';
+    }
+    else{
+        coloredtext(FOREGROUND_RED,"Nu sunt masini in stoc");
+    }
 
 }
 
 void del_veh(int argc,char *argv[]){
 
     if(argc == 7){
-
-        int ok = 0;
-        for(int i = 1 ; i <= nrMasini ; ++i){
-            Masina a(argv[2],argv[3],argv[4],argv[5],argv[6]);
-            if(a == Masini[i]){
-                for(int j = i ; j < nrMasini ; ++j)
-                    Masini[j] = Masini[j + 1];
-
-                nrMasini--;
-                ok = 1;
-                ofstream ofs("txt_files/masini.txt", ofstream::out | ofstream::trunc);
-                ofs.close();
-                ofstream afis("txt_files/masini.txt");
-                for(int i = 1 ; i <= nrMasini ; ++i)
-                    afis << Masini[i] << '\n';
-
-                coloredtext(FOREGROUND_GREEN,"Masina stearsa cu succes !");
-                Sleep(2500);
-
-                afis.close();
-
-                break;
-            }
-        }
-        if(ok == 0){
-            coloredtext(FOREGROUND_RED,"Masina nu a fost gasita ! Foloseste comanda VA pentru a vizualiza vehiculele");
-        }
-    }
-    else{
-        coloredtext(FOREGROUND_RED,"SINTAXA INVALIDA ! Foloseste comanda Help");
-    }
-
-}
-void update_veh(int argc,char *argv[]){
-
-    if(argc == 8){
-        int ok = 0;
-        if(strcmp("Disponibil",argv[7]) == 0){
+        if(admin_safe()){
+            int ok = 0;
             for(int i = 1 ; i <= nrMasini ; ++i){
                 Masina a(argv[2],argv[3],argv[4],argv[5],argv[6]);
                 if(a == Masini[i]){
+                    for(int j = i ; j < nrMasini ; ++j)
+                        Masini[j] = Masini[j + 1];
+
+                    nrMasini--;
                     ok = 1;
-                    change_disp(Masini[i],"Disponibil");
-                }
-            }
-            if(ok == 0){
-                coloredtext(FOREGROUND_RED,"Masina nu a fost gasita ! Foloseste comanda VA pentru a vizualiza vehiculele");
-            }   
-        }
-        else if(strcmp("Indisponibil",argv[7]) == 0){
-            
-            for(int i = 1 ; i <= nrMasini ; ++i){
-                Masina a(argv[2],argv[3],argv[4],argv[5],argv[6]);
-                if(a == Masini[i]){
-                    ok = 1;
-                    change_disp(Masini[i],"Indisponibil");
+                    ofstream ofs("txt_files/masini.txt", ofstream::out | ofstream::trunc);
+                    ofs.close();
+                    ofstream afis("txt_files/masini.txt");
+                    for(int i = 1 ; i <= nrMasini ; ++i)
+                        afis << Masini[i] << '\n';
+
+                    coloredtext(FOREGROUND_GREEN,"Masina stearsa cu succes !");
+                    Sleep(2500);
+
+                    afis.close();
+
+                    break;
                 }
             }
             if(ok == 0){
@@ -182,33 +202,78 @@ void update_veh(int argc,char *argv[]){
             }
         }
         else{
-            for(int i = 1 ; i <= nrMasini ; ++i){
-                Masina a(argv[2],argv[3],argv[4],argv[5],argv[6]);
-                if(a == Masini[i]){
-                    ok = 1;
-                    change_price(Masini[i],argv[7]);
-                }
-            }
-            if(ok == 0){
-                coloredtext(FOREGROUND_RED,"Masina nu a fost gasita ! Foloseste comanda VA pentru a vizualiza vehiculele");
-            }
+            coloredtext(FOREGROUND_RED,"Parola de ADMIN gresita");
         }
-        if(ok){
-            ofstream ofs("txt_files/masini.txt", ofstream::out | ofstream::trunc);
-            ofs.close();
-            ofstream afis("txt_files/masini.txt");
-            for(int i = 1 ; i <= nrMasini ; ++i)
-                afis << Masini[i] << '\n';
-
-            coloredtext(FOREGROUND_GREEN,"Masina modificata cu succes !");
-            Sleep(2500);
-
-            afis.close();
-        }
-
     }
     else{
-        coloredtext(FOREGROUND_RED,"SINTAXA INVALIDA ! Foloseste comanda Help");
+        coloredtext(FOREGROUND_RED,"SINTAXA INVALIDA ! Foloseste comanda Help\n");
+        coloredtext(FOREGROUND_RED,"DELETE [nume] [model] [an] [disponibilitate] [pret]\n");
+    }
+
+}
+void update_veh(int argc,char *argv[]){
+
+    if(argc == 8){
+        if(admin_safe()){
+            int ok = 0;
+            if(strcmp("Disponibil",argv[7]) == 0){
+                for(int i = 1 ; i <= nrMasini ; ++i){
+                    Masina a(argv[2],argv[3],argv[4],argv[5],argv[6]);
+                    if(a == Masini[i]){
+                        ok = 1;
+                        change_disp(Masini[i],"Disponibil");
+                    }
+                }
+                if(ok == 0){
+                    coloredtext(FOREGROUND_RED,"Masina nu a fost gasita ! Foloseste comanda VA pentru a vizualiza vehiculele");
+                }
+            }
+            else if(strcmp("Indisponibil",argv[7]) == 0){
+
+                for(int i = 1 ; i <= nrMasini ; ++i){
+                    Masina a(argv[2],argv[3],argv[4],argv[5],argv[6]);
+                    if(a == Masini[i]){
+                        ok = 1;
+                        change_disp(Masini[i],"Indisponibil");
+                    }
+                }
+                if(ok == 0){
+                    coloredtext(FOREGROUND_RED,"Masina nu a fost gasita ! Foloseste comanda VA pentru a vizualiza vehiculele");
+                }
+            }
+            else{
+                for(int i = 1 ; i <= nrMasini ; ++i){
+                    Masina a(argv[2],argv[3],argv[4],argv[5],argv[6]);
+                    if(a == Masini[i]){
+                        ok = 1;
+                        change_price(Masini[i],argv[7]);
+                    }
+                }
+                if(ok == 0){
+                    coloredtext(FOREGROUND_RED,"Masina nu a fost gasita ! Foloseste comanda VA pentru a vizualiza vehiculele");
+                }
+            }
+            if(ok){
+                ofstream ofs("txt_files/masini.txt", ofstream::out | ofstream::trunc);
+                ofs.close();
+                ofstream afis("txt_files/masini.txt");
+                for(int i = 1 ; i <= nrMasini ; ++i)
+                    afis << Masini[i] << '\n';
+
+                coloredtext(FOREGROUND_GREEN,"Masina modificata cu succes !");
+                Sleep(2500);
+
+                afis.close();
+            }
+
+        }
+        else{
+            coloredtext(FOREGROUND_RED,"Parola de ADMIN gresita");
+        }
+    }
+    else{
+        coloredtext(FOREGROUND_RED,"SINTAXA INVALIDA ! Foloseste comanda Help\n");
+        coloredtext(FOREGROUND_RED,"UPDATE [nume] [model] [an] [disponibilitate] [pret] [\"Disponibil\"/\"Indisponibil\"/\"Pret\"]\n");
     }
 }
 void rent_veh(int argc,char *argv[]){
@@ -239,7 +304,9 @@ void rent_veh(int argc,char *argv[]){
         }
     }
     else{
-        coloredtext(FOREGROUND_RED,"SINTAXA INVALIDA ! Foloseste comanda Help");
+        coloredtext(FOREGROUND_RED,"SINTAXA INVALIDA ! Foloseste comanda Help\n");
+        coloredtext(FOREGROUND_RED,"RENT [nume] [model] [an] [disponibilitate] [pret]\n");
+
     }
 
 }
@@ -272,7 +339,8 @@ void unrent_veh(int argc,char *argv[]){
         }
     }
     else{
-        coloredtext(FOREGROUND_RED,"SINTAXA INVALIDA ! Foloseste comanda Help");
+        coloredtext(FOREGROUND_RED,"SINTAXA INVALIDA ! Foloseste comanda Help\n");
+        coloredtext(FOREGROUND_RED,"UNRENT [nume] [model] [an] [disponibilitate] [pret]\n");
     }
 
 }
@@ -372,8 +440,10 @@ int main(int argc,char *argv[]){
         unrent_veh(argc,argv);
     else if(strcmp(argv[1],"SEARCH") == 0)
         search_veh(argc,argv);
-    
+
 
 
     return 0;
 }
+
+/// g++ sources/*.cpp -o project
