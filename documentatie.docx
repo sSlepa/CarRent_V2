@@ -1,0 +1,46 @@
+Sistem de gestiune si inchiriere masini
+
+Student 1 : Gaspar Andrei Razvan			Student 2 : Georgescu Sebastian Andrei
+
+1.Organizare echipa
+Studentul 1 s-a ocupat de :
+1. Vizualizare Autoturisme
+2. Inchiriere
+ 3. Anuleaza inchiriere
+ 4. Adaugare Masina
+
+Studentul 2 s-a ocupat de :
+5. Stergere Masina
+6. Actualizare Masina
+7. Cautare Masina
+8. Help
+
+2.Structura datelor folosite :
+Vom folosi clasa Masina :
+•	Vom avea string-urile : nume, model, an,disponibilitate,pret
+
+3.Structura fisierelor :
+•	masini.txt – Stocam informatiile referitoare la masina, aferente clasei.
+<nume > <model > <an > <disponibilitate ><pret>
+4.Interactiunea cu executabilul :
+ ./main VA 
+- Vizualizare Autoturisme;
+
+
+./main RENT [nume] [model] [an] [disponibilitate] [pret]
+-Inchiriere masina
+
+./main UNRENT [nume] [model] [an] [disponibilitate] [pret]
+-anulare inchiriere
+
+./main ADD [nume] [model] [an] [disponibilitate] [pret]
+-adaugare vehicul
+
+./main DELETE [nume] [model] [an] [disponibilitate] [pret]
+-stergere vehicul
+
+./main UPDATE [nume] [model] [an] [disponibilitate] [pret] [\"Disponibil\"/\"Indisponibil\"/\"Pret\"]
+-actualizare informatii vehicul
+
+./main SEARCH ([nume] / [model] / [an] / [disponibilitate] / [pret]) [text] - Doar 1 optiune
+-Cautare vehicule dupa criteriu
